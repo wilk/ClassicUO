@@ -49,8 +49,13 @@ internal static class Mounts
         _mounts[0x3EBC] = new(0x0317, 0x3EBC, 0); // 16060 Beetle
         _mounts[0x3EBD] = new(0x031A, 0x3EBD, 0); // 16061 SwampDragon
         _mounts[0x3EBE] = new(0x031F, 0x3EBE, 0); // 16062 Armored Swamp Dragon
+        _mounts[0x3EBF] = new(0x000C, 0x3EBF, 0); // Dragon, GreaterDragon
+        _mounts[0x3EC0] = new(0x003B, 0x3EC0, 0); // Dragon, GreaterDragon, second body
+        _mounts[0x3EC1] = new(0x003C, 0x3EC1, 0); // Drake
+        _mounts[0x3EC2] = new(0x003D, 0x3EC2, 0); // Drake, second body
         _mounts[0x3EC3] = new(0x02D4, 0x3EC3, 0); // 16067 Beetle
         _mounts[0x3ECE] = new(0x059A, 0x3ECE, 0); // serpentine dragon
+        _mounts[0x3EC4] = new(0x0067, 0x3EC4, 0); // SerpentineDragon
         _mounts[0x3EC5] = new(0x00D5, 0x3EC5, 0); // 16069
         _mounts[0x3F3A] = new(0x00D5, 0x3F3A, 0); // 16186 snow bear ???
         _mounts[0x3EC6] = new(0x01B0, 0x3EC6, 9); // 16070 Boura
@@ -81,6 +86,7 @@ internal static class Mounts
         _mounts[0x3EE0] = new(0x0675, 0x3EE0, 0); // Horse_Elemental_Fire
         _mounts[0x3EE1] = new(0x0678, 0x3EE1, 0); // Horse_Elemental_Water
         _mounts[0x3EE2] = new(0x0679, 0x3EE2, 0); // Horse_Elemental_Air
+        _mounts[0x3EE3] = new(0x02CB, 0x3EE3, 0); // Boura
     }
 
     public static bool TryGet(ushort animId, out MountInfo mountInfo)
