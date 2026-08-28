@@ -90,24 +90,20 @@ namespace ClassicUO.Game
                         {
                             uint flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
 
-                            if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
-                            {
-                                if (tile1.TileData.IsWet)
-                                {
-                                    flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
-                                }
-                            }
-                            else
-                            {
-                                if (!tile1.TileData.IsImpassable)
-                                {
-                                    flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
-                                }
+                            // Shard change (ServUO issue #49): a sea horse rider keeps the
+                            // normal land rules and gains wet tiles on top of them. Stock
+                            // ClassicUO replaced the land rules with a wet-only test, so a
+                            // rider could cross water but not land.
+                            bool amphibious = stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE && tile1.TileData.IsWet;
 
-                                if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && tile1.TileData.IsNoDiagonal)
-                                {
-                                    flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
-                                }
+                            if (!tile1.TileData.IsImpassable || amphibious)
+                            {
+                                flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
+                            }
+
+                            if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && tile1.TileData.IsNoDiagonal)
+                            {
+                                flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                             }
 
                             int landMinZ = tile1.MinZ;
@@ -206,57 +202,55 @@ namespace ClassicUO.Game
                                 var graphic = obj is Item it && it.IsMulti ? it.MultiGraphic : obj.Graphic;
                                 ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[graphic];
 
-                                if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
+                                if (itemdata.IsImpassable || itemdata.IsSurface)
                                 {
-                                    if (itemdata.IsWet)
+                                    flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
+                                }
+
+                                if (!itemdata.IsImpassable)
+                                {
+                                    if (itemdata.IsSurface)
                                     {
-                                        flags = (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
+                                        flags |= (uint) PATH_OBJECT_FLAGS.POF_SURFACE;
+                                    }
+
+                                    if (itemdata.IsBridge)
+                                    {
+                                        flags |= (uint) PATH_OBJECT_FLAGS.POF_BRIDGE;
                                     }
                                 }
-                                else
+
+                                // Shard change (ServUO issue #49): a wet static carries the
+                                // rider as well. This adds to the normal rules above, and
+                                // does not replace them, so land still works.
+                                if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE && itemdata.IsWet)
                                 {
-                                    if (itemdata.IsImpassable || itemdata.IsSurface)
-                                    {
-                                        flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
-                                    }
+                                    flags |= (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
+                                }
 
-                                    if (!itemdata.IsImpassable)
+                                if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM)
+                                {
+                                    if (graphicHelper <= 0x0846)
                                     {
-                                        if (itemdata.IsSurface)
-                                        {
-                                            flags |= (uint) PATH_OBJECT_FLAGS.POF_SURFACE;
-                                        }
-
-                                        if (itemdata.IsBridge)
-                                        {
-                                            flags |= (uint) PATH_OBJECT_FLAGS.POF_BRIDGE;
-                                        }
-                                    }
-
-                                    if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM)
-                                    {
-                                        if (graphicHelper <= 0x0846)
-                                        {
-                                            if (!(graphicHelper != 0x0846 && graphicHelper != 0x0692 && (graphicHelper <= 0x06F4 || graphicHelper > 0x06F6)))
-                                            {
-                                                dropFlags = true;
-                                            }
-                                        }
-                                        else if (graphicHelper == 0x0873)
+                                        if (!(graphicHelper != 0x0846 && graphicHelper != 0x0692 && (graphicHelper <= 0x06F4 || graphicHelper > 0x06F6)))
                                         {
                                             dropFlags = true;
                                         }
                                     }
-
-                                    if (dropFlags)
+                                    else if (graphicHelper == 0x0873)
                                     {
-                                        flags &= 0xFFFFFFFE;
+                                        dropFlags = true;
                                     }
+                                }
 
-                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && itemdata.IsNoDiagonal)
-                                    {
-                                        flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
-                                    }
+                                if (dropFlags)
+                                {
+                                    flags &= 0xFFFFFFFE;
+                                }
+
+                                if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && itemdata.IsNoDiagonal)
+                                {
+                                    flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                                 }
 
                                 if (flags != 0)
