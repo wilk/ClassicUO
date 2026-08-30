@@ -10,6 +10,8 @@ namespace ClassicUO.Game.Data
         public const int STEP_DELAY_MOUNT_WALK = 200;
         public const int STEP_DELAY_RUN = 200;
         public const int STEP_DELAY_WALK = 400;
+        public const int STEP_DELAY_SWIFT_MOUNT_RUN = 50;
+        public const int STEP_DELAY_SWIFT_MOUNT_WALK = 100;
 
         public static bool FastRotation;
         public static int TurnDelay => FastRotation ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY;
@@ -22,6 +24,16 @@ namespace ClassicUO.Game.Data
             }
 
             return run ? STEP_DELAY_RUN : STEP_DELAY_WALK;
+        }
+
+        public static int TimeToCompleteMovement(bool run, bool mounted, CharacterSpeedType speedMode)
+        {
+            if (speedMode == CharacterSpeedType.SwiftMount)
+            {
+                return run ? STEP_DELAY_SWIFT_MOUNT_RUN : STEP_DELAY_SWIFT_MOUNT_WALK;
+            }
+
+            return TimeToCompleteMovement(run, mounted);
         }
 
         public static void GetPixelOffset(byte dir, ref float x, ref float y, float framesPerTile)
