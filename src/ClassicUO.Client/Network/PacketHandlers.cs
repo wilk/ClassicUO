@@ -4685,7 +4685,7 @@ namespace ClassicUO.Network
                 case 0x26:
                     byte val = p.ReadUInt8();
 
-                    if (val > (int)CharacterSpeedType.FastUnmountAndCantRun)
+                    if (val > (int)CharacterSpeedType.SwiftMount)
                     {
                         val = 0;
                     }
